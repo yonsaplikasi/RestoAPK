@@ -5,40 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RestoAPK - Portal Utama</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .portal-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-width: 400px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    .btn-portal {
-      padding: 1rem;
-      font-size: 1.1rem;
-      text-decoration: none;
-      color: white;
-      background: #e63946;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .btn-dapur { background: #343a40; }
-    .btn-kasir { background: #28a745; }
-  </style>
 </head>
 <body>
 
   <header>
-    <h1>Selamat Datang di RestoAPK</h1>
-    <p>Silakan pilih menu navigasi di bawah ini:</p>
+    <h1>RestoAPK Order System</h1>
+    <p>Pilih halaman yang ingin dibuka:</p>
   </header>
 
-  <div class="portal-container">
-    <a href="menu.html" class="btn-portal">📱 Pelanggan (Pesan Menu)</a>
-    <a href="kitchen.html" class="btn-portal btn-dapur">👨‍🍳 Dapur (Kitchen Display)</a>
-    <a href="cashier.html" class="btn-portal btn-kasir">💳 Kasir & Pembayaran</a>
+  <div style="max-width: 400px; margin: 20px auto; padding: 15px; display: flex; flex-direction: column; gap: 10px;">
+    <a href="menu.html" class="btn">📱 Menu Pelanggan</a>
+    <a href="kitchen.html" class="btn btn-secondary">👨‍🍳 Halaman Dapur</a>
+    <a href="cashier.html" class="btn btn-success">💳 Halaman Kasir</a>
   </div>
 
 </body>
