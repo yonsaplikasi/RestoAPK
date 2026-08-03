@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dapur - Pesanan Masuk</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header style="background: #343a40;">
+    <h1>Dapur Resto</h1>
+  </header>
+
+  <div class="container">
+    <div id="kitchen-orders">Memuat pesanan dapur...</div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function loadKitchenOrders() {
+      const res = await RestoAPI.getKitchenOrders();
+      const container = document.getElementById("kitchen-orders");
+
+      if (res.success) {
+        if (res.data.length === 0) {
+          container.innerHTML = "<p>Tidak ada pesanan aktif.</p>";
+          return;
+        }
+
+        container.innerHTML = res.data.map(o => `
+          <div class="order-card">
+            <h3>${o.mejaNama} (${o.orderId})</h3>
+            <p>Status: <span class="badge badge-${o.status}">${o.status}</span></p>
+            <ul>
+              ${o.items.map(i => `<li><strong>${i.qty}x</strong> ${i.nama}</li>`).join('')}
+            </ul>
+            <div style="display:flex; gap:0.5rem;">
+              ${o.status === "Menunggu" ? `<button class="btn" onclick="updateStatus('${o.orderId}', 'Diproses')">Proses</button>` : ''}
+              ${o.status === "Diproses" ? `<button class="btn btn-success" onclick="updateStatus('${o.orderId}', 'Siap')">Siap Diantar</button>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    async function updateStatus(orderId, status) {
+      await RestoAPI.updateStatus(orderId, status);
+      loadKitchenOrders();
+    }
+
+    loadKitchenOrders();
+    setInterval(loadKitchenOrders, 5000);
+  </script>
+</body>
+</html>
