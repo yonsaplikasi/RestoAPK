@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Pesanan</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Status Pesanan</h1>
+  </header>
+
+  <div class="container">
+    <div class="order-card" id="status-card">
+      <p>Memuat status...</p>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId');
+
+    async function loadStatus() {
+      if (!orderId) return;
+      const res = await RestoAPI.getOrderStatus(orderId);
+      if (res.success) {
+        const d = res.data;
+        document.getElementById("status-card").innerHTML = `
+          <h2>Order ID: ${d.orderId}</h2>
+          <p>Pemesan: <strong>${d.mejaNama}</strong></p>
+          <p>Status: <span class="badge badge-${d.status}">${d.status}</span></p>
+          <hr>
+          <h4>Detail Pesanan:</h4>
+          <ul>
+            ${d.items.map(i => `<li>${i.nama} x ${i.qty} = Rp ${i.subtotal.toLocaleString('id-ID')}</li>`).join('')}
+          </ul>
+          <h3>Total: Rp ${d.total.toLocaleString('id-ID')}</h3>
+        `;
+      }
+    }
+
+    loadStatus();
+    setInterval(loadStatus, 5000); // Auto Refresh tiap 5 detik
+  </script>
+</body>
+</html>
