@@ -1,0 +1,131 @@
+:root {
+  --primary: #e63946;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #2b2d42;
+  --border: #e0e0e0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  padding-bottom: 80px;
+}
+
+header {
+  background: var(--primary);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 { margin: 0; font-size: 1.5rem; }
+header p { margin: 0.25rem 0 0 0; font-size: 0.9rem; opacity: 0.9; }
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.menu-card {
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-card img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.menu-card h4 { margin: 0.5rem 0 0.25rem 0; font-size: 1rem; }
+.menu-card p { margin: 0 0 0.5rem 0; font-weight: bold; color: var(--primary); }
+
+.btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+}
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+.btn-success {
+  background: #28a745;
+}
+
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  padding: 1rem;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: bold;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.order-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: white;
+}
+.badge-Menunggu { background: #ffc107; color: black; }
+.badge-Diproses { background: #17a2b8; }
+.badge-Siap { background: #28a745; }
+.badge-Selesai { background: #6c757d; }
