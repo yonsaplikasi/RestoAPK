@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keranjang Pesanan</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Keranjang Pesanan</h1>
+  </header>
+
+  <div class="container">
+    <div id="cart-items"></div>
+
+    <hr style="margin: 1.5rem 0;">
+
+    <div class="form-group">
+      <label for="cust-name">Nama Pemesan <span style="color:red">*</span></label>
+      <input type="text" id="cust-name" placeholder="Contoh: Budi" required>
+    </div>
+
+    <div class="form-group" id="table-select-group" style="display: none;">
+      <label for="cust-table">Pilih Nomor Meja / Tipe <span style="color:red">*</span></label>
+      <select id="cust-table">
+        <option value="">-- Pilih --</option>
+        <option value="Meja 1">Meja 1</option>
+        <option value="Meja 2">Meja 2</option>
+        <option value="Meja 3">Meja 3</option>
+        <option value="Takeaway">Takeaway / Bungkus</option>
+      </select>
+    </div>
+
+    <h3>Total: Rp <span id="checkout-total">0</span></h3>
+    <button class="btn" onclick="processCheckout()">Checkout Pesanan</button>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>
