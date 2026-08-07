@@ -1,6 +1,5 @@
-// Ganti dengan Deployment Web App URL Google Apps Script Anda
-const API_URL = "https://script.google.com/macros/s/AKfycbw5uzSVMdCiDEmJxbHkrEFYtTOcItLr-kKLzdfowGH-K_Wjkxtu0CaGsqyvKf6vAVwTKg/exec
-";
+// Gantilah URL di bawah ini dengan URL Web App Apps Script Anda
+const API_URL = "PASANG_URL_WEB_APP_APPS_SCRIPT_ANDA_DI_SINI";
 
 const RestoAPI = {
   async getMenu() {
