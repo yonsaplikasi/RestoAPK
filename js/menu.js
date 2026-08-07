@@ -1,6 +1,6 @@
 let cart = [];
 const urlParams = new URLSearchParams(window.location.search);
-const mejaParam = urlParams.get('Meja');
+const mejaParam = urlParams.get('meja');
 
 document.addEventListener("DOMContentLoaded", () => {
   const mejaInfoEl = document.getElementById("meja-info");
