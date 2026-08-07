@@ -1,5 +1,5 @@
 // Ganti dengan Deployment Web App URL Google Apps Script Anda
-const API_URL = "https://script.google.com/macros/s/AKfycbzNjhEdX5waFCRjnLHZj706804MR-FbqwHeRLFGEoIscGrJ4730ooxVdZj2YaDhx8B-Ng/exec
+const API_URL = "https://script.google.com/macros/s/AKfycbw5uzSVMdCiDEmJxbHkrEFYtTOcItLr-kKLzdfowGH-K_Wjkxtu0CaGsqyvKf6vAVwTKg/exec
 ";
 
 const RestoAPI = {
