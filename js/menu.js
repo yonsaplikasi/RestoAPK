@@ -47,7 +47,7 @@ function renderMenu() {
     return;
   }
 
-  // 1. Kelompokkan menu berdasarkan properti kategori
+  // 1. Kelompokkan menu berdasarkan Kategori
   const groupedMenu = window.menuData.reduce((acc, item) => {
     const category = item.kategori || "Lainnya";
     if (!acc[category]) {
@@ -57,14 +57,16 @@ function renderMenu() {
     return acc;
   }, {});
 
-  // 2. Render tampilan HTML terpisah per kategori
+  // 2. Render kategori berurut ke bawah, menu di dalamnya tersusun grid/samping
   container.innerHTML = Object.keys(groupedMenu).map(category => `
-    <div class="category-section" style="width: 100%; margin-bottom: 2rem;">
-      <h2 style="font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; text-transform: capitalize;">
+    <div class="category-block" style="margin-bottom: 2rem;">
+      <!-- Judul Kategori (Memanjang Ke Bawah) -->
+      <h3 style="font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.3rem; margin-bottom: 1rem; text-transform: uppercase;">
         ${category}
-      </h2>
+      </h3>
       
-      <div class="menu-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;">
+      <!-- Grid Item Menu di bawah Kategori -->
+      <div class="menu-grid">
         ${groupedMenu[category].map(item => {
           const cartItem = cart.find(i => i.id === item.id);
           const qty = cartItem ? cartItem.qty : 0;
