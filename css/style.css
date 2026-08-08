@@ -1,20 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary: #FF6B35;
-  --primary-hover: #E85A24;
-  --primary-light: #FFF0EB;
-  --bg: #F8F9FA;
+  --primary: #FF5A5F;
+  --primary-hover: #E0484C;
+  --bg: #F4F6F8;
   --card: #FFFFFF;
-  --text-main: #1A1D20;
-  --text-muted: #6C757D;
-  --border: #E9ECEF;
-  --radius-lg: 16px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  --radius: 16px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -22,262 +17,202 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg);
-  color: var(--text-main);
+  color: var(--text);
   margin: 0;
   padding: 0;
   padding-bottom: 100px;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* Header Modern */
+/* Header UI Modern */
 header {
   background: var(--card);
-  color: var(--text-main);
-  padding: 1.25rem 1rem;
+  color: var(--text);
+  padding: 1.2rem 1rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 100;
-  backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
 header h1 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
 }
 
 header p {
-  margin: 0.35rem 0 0 0;
+  margin: 0.25rem 0 0 0;
   font-size: 0.85rem;
   color: var(--text-muted);
-  font-weight: 500;
 }
 
-/* Layout Container */
+/* Layout Main Container */
 .container {
-  max-width: 480px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 1.25rem 1rem;
 }
 
-/* Grid Menu / Katalog */
+/* Responsive Grid Menu */
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
 }
 
 .menu-card {
   background: var(--card);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   padding: 0.85rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
 }
 
 .menu-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
 }
 
 .menu-card img {
   width: 100%;
   height: 120px;
   object-fit: cover;
-  border-radius: var(--radius-md);
-  margin-bottom: 0.75rem;
+  border-radius: 12px;
+  background-color: #f0f0f0;
 }
 
 .menu-card h4 {
-  margin: 0 0 0.25rem 0;
+  margin: 0.6rem 0 0.2rem 0;
   font-size: 0.95rem;
   font-weight: 600;
-  line-height: 1.3;
 }
 
 .menu-card p {
   margin: 0 0 0.75rem 0;
-  font-size: 0.95rem;
   font-weight: 700;
   color: var(--primary);
+  font-size: 0.95rem;
 }
 
-/* Tombol / Buttons */
+/* Action Control (+ Tambah & Multi-button + / -) */
 .btn {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-md);
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
   cursor: pointer;
   width: 100%;
   font-weight: 600;
-  font-size: 0.9rem;
   font-family: inherit;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+  transition: background 0.2s;
 }
 
 .btn:hover {
   background: var(--primary-hover);
-  transform: translateY(-1px);
 }
 
-.btn:active {
-  transform: translateY(0);
+.qty-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.2rem;
 }
 
-.btn-secondary {
-  background: #6C757D;
-  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+.btn-qty {
+  background: var(--primary);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-secondary:hover {
-  background: #5A6268;
+.qty-number {
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0 0.5rem;
 }
 
-.btn-success {
-  background: #10B981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-}
-
-.btn-success:hover {
-  background: #059669;
-}
-
-/* Cart Bar (Bottom Floating Bar) */
+/* Cart Bar (Bottom Floating) */
 .cart-bar {
   position: fixed;
   bottom: 1.25rem;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 2rem);
-  max-width: 440px;
-  background: #1A1D20;
+  max-width: 560px;
+  background: #0F172A;
   color: white;
   padding: 0.85rem 1.25rem;
   border-radius: 50px;
-  box-shadow: var(--shadow-float);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 99;
-}
-
-.cart-bar span, .cart-bar strong {
-  color: #FFFFFF;
+  z-index: 100;
 }
 
 .cart-bar .btn {
   width: auto;
-  padding: 0.5rem 1.25rem;
   border-radius: 30px;
-  font-size: 0.85rem;
-  box-shadow: none;
+  padding: 0.5rem 1.25rem;
 }
 
-/* Form Styling */
+/* Forms & Cards */
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--text-main);
+  font-size: 0.9rem;
 }
 
-.form-group input, 
-.form-group select {
+.form-group input, .form-group select {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 10px;
   box-sizing: border-box;
   font-family: inherit;
-  font-size: 0.9rem;
-  background-color: var(--card);
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-group input:focus, 
-.form-group select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
-}
-
-/* Order Cards (Kitchen / Cashier / Status) */
 .order-card {
-  background: var(--card);
+  background: white;
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  border-radius: var(--radius);
+  padding: 1rem;
   margin-bottom: 1rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
 }
 
-.order-card h3, .order-card h2 {
-  margin-top: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.order-card ul {
-  padding-left: 1.25rem;
-  margin: 0.75rem 0;
-}
-
-.order-card li {
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
-}
-
-/* Badges Modern */
 .badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.75rem;
-  border-radius: 20px;
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
   font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-weight: bold;
 }
-
-.badge-Menunggu { 
-  background: #FEF3C7; 
-  color: #D97706; 
-}
-
-.badge-Diproses { 
-  background: #E0F2FE; 
-  color: #0284C7; 
-}
-
-.badge-Siap { 
-  background: #D1FAE5; 
-  color: #059669; 
-}
-
-.badge-Selesai { 
-  background: #F3F4F6; 
-  color: #4B5563; 
-}
+.badge-Menunggu { background: #FEF3C7; color: #D97706; }
+.badge-Diproses { background: #E0F2FE; color: #0284C7; }
+.badge-Siap { background: #DCFCE7; color: #15803D; }
+.badge-Selesai { background: #F1F5F9; color: #475569; }
