@@ -1,5 +1,5 @@
 // Gantilah URL di bawah ini dengan URL Web App Apps Script Anda
-const API_URL = "https://script.google.com/macros/s/AKfycbw6OLMpXikNgmbNaShMj09cQxj9383Uoq3zdQg4tfhebLh6tdJMKr8BbiN0vINPwgE1WQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz_Isw4fLaEp_zKcQmIl49HJdbiWtCZGw6AFyvC-8W_QiO7nCqPl0ObDOBZ6s7HJ7Zl/exec";
 
 const RestoAPI = {
   async getMenu() {
