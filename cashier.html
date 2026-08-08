@@ -4,26 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kasir - Pembayaran</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    @media print {
-      body * { visibility: hidden; }
-      #printable-receipt, #printable-receipt * { visibility: visible; }
-      #printable-receipt { position: absolute; left: 0; top: 0; width: 100%; }
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
 <body>
-  <header style="background: #28a745;">
-    <h1>Kasir Resto</h1>
+  <header>
+    <h1>Halaman Kasir</h1>
+    <p>Kelola Pembayaran Pesanan</p>
   </header>
 
   <div class="container">
-    <div id="cashier-orders">Memuat pesanan...</div>
+    <div id="cashier-orders">Memuat data transaksi...</div>
   </div>
-
-  <!-- Area Struk Tersembunyi untuk Cetak -->
-  <div id="printable-receipt" style="display:none; padding:10px; font-family:monospace;"></div>
 
   <script src="js/api.js"></script>
   <script>
@@ -32,40 +23,63 @@
       const container = document.getElementById("cashier-orders");
 
       if (res.success) {
+        if (res.data.length === 0) {
+          container.innerHTML = "<p style='text-align:center;'>Tidak ada transaksi aktif.</p>";
+          return;
+        }
+
         container.innerHTML = res.data.map(o => `
           <div class="order-card">
-            <h3>${o.orderId} - ${o.mejaNama}</h3>
-            <p>Total: <strong>Rp ${Number(o.total).toLocaleString('id-ID')}</strong></p>
-            <p>Status: <span class="badge badge-${o.status}">${o.status}</span></p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <strong>ID: ${o.orderId}</strong>
+              <span class="badge badge-${o.status}">${o.status}</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0;">Pemesan / Meja: <strong>${o.mejaNama}</strong></p>
+            
+            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+            
+            <!-- Rincian Struk Item -->
+            <div style="font-size:0.85rem; margin-bottom: 0.75rem;">
+              ${o.items.map(i => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                  <span>${i.nama} x ${i.qty}</span>
+                  <span>Rp ${Number(i.subtotal).toLocaleString('id-ID')}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+              <span style="font-weight:bold;">Total Pembayaran:</span>
+              <strong style="color:var(--primary); font-size:1.1rem;">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
+            </div>
+
             ${o.status !== "Selesai" ? `
-              <button class="btn btn-success" onclick="pay('${o.orderId}', ${o.total})">Bayar / Lunasi</button>
-            ` : `
-              <button class="btn btn-secondary" onclick="printReceipt('${o.orderId}', '${o.mejaNama}', ${o.total})">Cetak Struk</button>
-            `}
+              <button class="btn btn-success" onclick="processPayment('${o.orderId}', ${o.total})">
+                Proses Pembayaran
+              </button>
+            ` : `<p style="color:green; font-weight:bold; margin:0; text-align:center;">Lunas</p>`}
           </div>
         `).join('');
       }
     }
 
-    async function pay(orderId, total) {
-      if (confirm(`Konfirmasi pembayaran Rp ${total.toLocaleString('id-ID')} untuk ${orderId}?`)) {
-        await RestoAPI.processPayment(orderId, { metode: "Tunai", total: total });
-        loadCashierOrders();
-      }
-    }
+    async function processPayment(orderId, total) {
+      if (!confirm("Konfirmasi proses pembayaran untuk " + orderId + "?")) return;
+      
+      const paymentDetails = {
+        metode: "CASH",
+        total: total
+      };
 
-    function printReceipt(orderId, mejaNama, total) {
-      const receipt = document.getElementById("printable-receipt");
-      receipt.style.display = "block";
-      receipt.innerHTML = `
-        <h3 style="text-align:center;">RESTO QR ORDER</h3>
-        <p>Order ID: ${orderId}<br>Pemesan: ${mejaNama}<br>Tanggal: ${new Date().toLocaleString('id-ID')}</p>
-        <hr>
-        <p>TOTAL: Rp ${total.toLocaleString('id-ID')}</p>
-        <p style="text-align:center;">-- Terima Kasih --</p>
-      `;
-      window.print();
-      receipt.style.display = "none";
+      const res = await RestoAPI.processPayment(orderId, paymentDetails);
+      if (res.success) {
+        alert("Pembayaran Berhasil!");
+        loadCashierOrders();
+      } else {
+        alert("Gagal memproses pembayaran.");
+      }
     }
 
     loadCashierOrders();
