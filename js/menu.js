@@ -42,30 +42,56 @@ async function fetchMenu() {
 function renderMenu() {
   const container = document.getElementById("menu-container");
   
-  container.innerHTML = window.menuData.map(item => {
-    const cartItem = cart.find(i => i.id === item.id);
-    const qty = cartItem ? cartItem.qty : 0;
+  if (!window.menuData || window.menuData.length === 0) {
+    container.innerHTML = "<p style='text-align:center;'>Belum ada menu yang tersedia.</p>";
+    return;
+  }
 
-    return `
-      <div class="menu-card">
-        <img src="${item.foto || 'https://via.placeholder.com/150'}" alt="${item.nama}">
-        <h4>${item.nama}</h4>
-        <p>Rp ${Number(item.harga).toLocaleString('id-ID')}</p>
-        
-        <div id="action-${item.id}">
-          ${qty > 0 ? `
-            <div class="qty-control">
-              <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
-              <span class="qty-number">${qty}</span>
-              <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+  // 1. Kelompokkan menu berdasarkan properti kategori
+  const groupedMenu = window.menuData.reduce((acc, item) => {
+    const category = item.kategori || "Lainnya";
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {});
+
+  // 2. Render tampilan HTML terpisah per kategori
+  container.innerHTML = Object.keys(groupedMenu).map(category => `
+    <div class="category-section" style="width: 100%; margin-bottom: 2rem;">
+      <h2 style="font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 0.4rem; margin-bottom: 1rem; text-transform: capitalize;">
+        ${category}
+      </h2>
+      
+      <div class="menu-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;">
+        ${groupedMenu[category].map(item => {
+          const cartItem = cart.find(i => i.id === item.id);
+          const qty = cartItem ? cartItem.qty : 0;
+
+          return `
+            <div class="menu-card">
+              <img src="${item.foto || 'https://via.placeholder.com/150'}" alt="${item.nama}">
+              <h4>${item.nama}</h4>
+              <p>Rp ${Number(item.harga).toLocaleString('id-ID')}</p>
+              
+              <div id="action-${item.id}">
+                ${qty > 0 ? `
+                  <div class="qty-control">
+                    <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
+                    <span class="qty-number">${qty}</span>
+                    <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+                  </div>
+                ` : `
+                  <button class="btn" onclick="addToCart('${item.id}', '${item.nama}', ${item.harga})">+ Tambah</button>
+                `}
+              </div>
             </div>
-          ` : `
-            <button class="btn" onclick="addToCart('${item.id}', '${item.nama}', ${item.harga})">+ Tambah</button>
-          `}
-        </div>
+          `;
+        }).join('')}
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
 function addToCart(id, nama, harga) {
