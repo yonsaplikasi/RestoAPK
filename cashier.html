@@ -1,25 +1,98 @@
-function processPaymentData(orderId, paymentDetails) {
-  const orderSheet = getSheet("Order");
-  const paymentSheet = getSheet("Pembayaran");
-  const data = orderSheet.getDataRange().getValues();
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kasir - Pembayaran</title>
+  <link rel="stylesheet" href="css/style.css?v=1.1">
+</head>
+<body>
+  <header>
+    <h1>Halaman Kasir</h1>
+    <p>Kelola Pembayaran Pesanan</p>
+  </header>
 
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === orderId) {
-      // Ubah status order menjadi Selesai
-      orderSheet.getRange(i + 1, 4).setValue("Selesai");
-      
-      // Catat log transaksi pembayaran
-      paymentSheet.appendRow([
-        "PAY" + String(new Date().getTime()).slice(-6),
-        orderId,
-        paymentDetails.metode, // CASH, QRIS, atau TRANSFER
-        paymentDetails.total,
-        new Date()
-      ]);
+  <div class="container">
+    <div id="cashier-orders">Memuat data transaksi...</div>
+  </div>
 
-      return { success: true, message: "Pembayaran berhasil diproses" };
+  <script src="js/api.js"></script>
+  <script>
+    async function loadCashierOrders() {
+      const res = await RestoAPI.getCashierOrders();
+      const container = document.getElementById("cashier-orders");
+
+      if (res.success) {
+        if (!res.data || res.data.length === 0) {
+          container.innerHTML = "<p style='text-align:center;'>Tidak ada transaksi aktif.</p>";
+          return;
+        }
+
+        container.innerHTML = res.data.map(o => `
+          <div class="order-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <strong>ID: ${o.orderId}</strong>
+              <span class="badge badge-${o.status}">${o.status}</span>
+            </div>
+            <p style="margin: 0 0 0.5rem 0;">Pemesan / Meja: <strong>${o.mejaNama}</strong></p>
+            
+            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+            
+            <div style="font-size:0.85rem; margin-bottom: 0.75rem;">
+              ${o.items ? o.items.map(i => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                  <span>${i.nama} x ${i.qty}</span>
+                  <span>Rp ${Number(i.subtotal).toLocaleString('id-ID')}</span>
+                </div>
+              `).join('') : ''}
+            </div>
+
+            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+              <span style="font-weight:bold;">Total Pembayaran:</span>
+              <strong style="color:var(--primary); font-size:1.1rem;">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
+            </div>
+
+            ${o.status !== "Selesai" ? `
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label style="font-size: 0.8rem;">Pilih Metode Pembayaran:</label>
+                <select id="method-${o.orderId}">
+                  <option value="QRIS">QRIS (Gopay/OVO/Dana/BCA)</option>
+                  <option value="TRANSFER">Transfer Bank</option>
+                  <option value="CASH">Tunai / Cash</option>
+                </select>
+              </div>
+
+              <button class="btn btn-success" onclick="processPayment('${o.orderId}', ${o.total})">
+                Konfirmasi Pembayaran Lunas
+              </button>
+            ` : `<p style="color:green; font-weight:bold; margin:0; text-align:center;">✓ Lunas</p>`}
+          </div>
+        `).join('');
+      }
     }
-  }
 
-  return { success: false, message: "Order tidak ditemukan" };
-}
+    async function processPayment(orderId, total) {
+      const selectedMethod = document.getElementById(`method-${orderId}`).value;
+
+      if (!confirm(`Konfirmasi pembayaran Rp ${total.toLocaleString('id-ID')} via ${selectedMethod}?`)) return;
+      
+      const paymentDetails = {
+        metode: selectedMethod,
+        total: total
+      };
+
+      const res = await RestoAPI.processPayment(orderId, paymentDetails);
+      if (res.success) {
+        alert("Pembayaran Berhasil!");
+        loadCashierOrders();
+      } else {
+        alert("Gagal memproses pembayaran: " + res.message);
+      }
+    }
+
+    loadCashierOrders();
+  </script>
+</body>
+</html>
