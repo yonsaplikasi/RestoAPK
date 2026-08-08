@@ -120,16 +120,16 @@ async function processCheckout() {
     finalMejaInfo = `${selectedTable} (${custName})`;
   }
 
-  // Jika bayar tunai, beri tahu pelanggan
+  // Informasi Notifikasi ke Pelanggan
   if (paymentMethod === "CASH") {
-    alert("Pesanan terkirim! Silakan lakukan pembayaran TUNAI di kasir.");
+    alert("Pesanan berhasil dikirim!\n\nSilakan lakukan pembayaran TUNAI langsung di kasir.");
   } else {
-    alert(`Pesanan terkirim! Metode pembayaran: ${paymentMethod}. Silakan tunjukkan bukti transfer/QRIS jika diperlukan.`);
+    alert(`Pesanan berhasil dikirim!\n\nMetode Pembayaran: ${paymentMethod}.\nSilakan tunjukkan bukti bayar ke kasir saat verifikasi.`);
   }
 
   const payload = {
     nomorMeja: finalMejaInfo,
-    metodePembayaran: paymentMethod, // Dikirim ke Apps Script
+    metodePembayaran: paymentMethod, // Dikirim ke Google Apps Script
     total: cart.reduce((sum, i) => sum + (i.harga * i.qty), 0),
     items: cart
   };
