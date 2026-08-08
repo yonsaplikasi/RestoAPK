@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Status Pesanan</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
 <body>
   <header>
@@ -14,6 +14,16 @@
   <div class="container">
     <div class="order-card" id="status-card">
       <p>Memuat status...</p>
+    </div>
+
+    <!-- Area Tombol Aksi Tambahan -->
+    <div id="action-buttons" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+      <button id="btn-add-more" class="btn" onclick="addMoreOrder()" style="display: none;">
+        + Tambah Pesanan Lain
+      </button>
+      <a href="menu.html" class="btn btn-secondary" style="text-align: center; text-decoration: none;">
+        Ke Menu Utama
+      </a>
     </div>
   </div>
 
@@ -27,17 +37,46 @@
       const res = await RestoAPI.getOrderStatus(orderId);
       if (res.success) {
         const d = res.data;
+        
+        // Tampilkan Tombol Tambah Pesanan
+        document.getElementById("btn-add-more").style.display = "block";
+
         document.getElementById("status-card").innerHTML = `
-          <h2>Order ID: ${d.orderId}</h2>
-          <p>Pemesan: <strong>${d.mejaNama}</strong></p>
-          <p>Status: <span class="badge badge-${d.status}">${d.status}</span></p>
-          <hr>
-          <h4>Detail Pesanan:</h4>
-          <ul>
-            ${d.items.map(i => `<li>${i.nama} x ${i.qty} = Rp ${i.subtotal.toLocaleString('id-ID')}</li>`).join('')}
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h2 style="margin: 0; font-size: 1.1rem;">ID: ${d.orderId}</h2>
+            <span class="badge badge-${d.status}">${d.status}</span>
+          </div>
+          <p style="margin: 0 0 1rem 0;">Pemesan: <strong>${d.mejaNama}</strong></p>
+          
+          <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+          
+          <h4 style="margin: 0.5rem 0;">Detail Pesanan:</h4>
+          <ul style="padding-left: 1.2rem; margin-bottom: 1rem;">
+            ${d.items.map(i => `<li>${i.nama} x ${i.qty} = <strong>Rp ${i.subtotal.toLocaleString('id-ID')}</strong></li>`).join('')}
           </ul>
-          <h3>Total: Rp ${d.total.toLocaleString('id-ID')}</h3>
+
+          <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+          
+          <div style="display:flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: bold;">Total:</span>
+            <h3 style="margin:0; color: var(--primary);">Rp ${d.total.toLocaleString('id-ID')}</h3>
+          </div>
         `;
+      }
+    }
+
+    // Fungsi mengarahkan kembali ke menu dengan meja yang tersimpan
+    function addMoreOrder() {
+      const mode = localStorage.getItem("resto_mode");
+      const savedMeja = localStorage.getItem("resto_meja");
+
+      // Jika menggunakan Mode Fixed Table (Meja terdeteksi dari QR)
+      if (mode === "FIXED_TABLE" && savedMeja) {
+        // Ambil hanya angka meja jika tersimpan "Meja 1"
+        const mejaNum = savedMeja.replace(/[^0-9]/g, ''); 
+        window.location.href = `menu.html?meja=${mejaNum}`;
+      } else {
+        window.location.href = "menu.html";
       }
     }
 
