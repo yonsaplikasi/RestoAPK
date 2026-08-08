@@ -112,27 +112,34 @@ async function processCheckout() {
   let finalMejaInfo = "";
   if (mode === "FIXED_TABLE") {
     const savedMeja = localStorage.getItem("resto_meja");
-    finalMejaInfo = `${savedMeja} (${custName}) - [${paymentMethod}]`;
+    finalMejaInfo = `${savedMeja} (${custName})`;
   } else {
     const selectedTableEl = document.getElementById("cust-table");
     const selectedTable = selectedTableEl ? selectedTableEl.value : "";
     if (!selectedTable) return alert("Pilih Nomor Meja atau Tipe Pesanan!");
-    finalMejaInfo = `${selectedTable} (${custName}) - [${paymentMethod}]`;
+    finalMejaInfo = `${selectedTable} (${custName})`;
+  }
+
+  // Jika bayar tunai, beri tahu pelanggan
+  if (paymentMethod === "CASH") {
+    alert("Pesanan terkirim! Silakan lakukan pembayaran TUNAI di kasir.");
+  } else {
+    alert(`Pesanan terkirim! Metode pembayaran: ${paymentMethod}. Silakan tunjukkan bukti transfer/QRIS jika diperlukan.`);
   }
 
   const payload = {
     nomorMeja: finalMejaInfo,
+    metodePembayaran: paymentMethod, // Dikirim ke Apps Script
     total: cart.reduce((sum, i) => sum + (i.harga * i.qty), 0),
     items: cart
   };
 
-  alert("Mengirim pesanan...");
   const res = await RestoAPI.submitOrder(payload);
 
-  if (res.success) {
+  if (res && res.success) {
     localStorage.removeItem("resto_cart");
     window.location.href = `status.html?orderId=${res.orderId}`;
   } else {
-    alert("Gagal memproses pesanan: " + res.message);
+    alert("Gagal memproses pesanan: " + (res ? res.message : 'Terjadi kesalahan'));
   }
 }
