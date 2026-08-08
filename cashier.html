@@ -182,7 +182,13 @@
       card.classList.remove("printable-receipt");
     }
 
+    // 1. Muat data pertama kali saat halaman dibuka
     loadCashierOrders();
+
+    // 2. Auto-refresh setiap 5 detik agar pesanan baru otomatis muncul
+    setInterval(() => {
+      loadCashierOrders();
+    }, 5000);
   </script>
 </body>
 </html>
