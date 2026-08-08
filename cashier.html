@@ -39,7 +39,30 @@
             return;
           }
 
-          container.innerHTML = res.data.map(o => {
+          const now = new Date().getTime();
+          const threeMinutesMs = 3 * 60 * 1000; // 3 menit dalam milidetik
+
+          // 1. FILTER: Sembunyikan jika sudah "Selesai" LEBIH DARI 3 Menit
+          const filteredOrders = res.data.filter(o => {
+            if (o.status === "Selesai") {
+              const orderTime = new Date(o.tanggal).getTime();
+              // Jika selisih waktu sekarang dengan waktu transaksi > 3 menit, hilangkan
+              if (!isNaN(orderTime) && (now - orderTime > threeMinutesMs)) {
+                return false; 
+              }
+            }
+            return true;
+          });
+
+          // 2. URUTAN: Balik array (.reverse()) agar data terbaru muncul di PALING ATAS
+          const sortedOrders = filteredOrders.reverse();
+
+          if (sortedOrders.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding: 2rem;'>Tidak ada transaksi aktif saat ini.</p>";
+            return;
+          }
+
+          container.innerHTML = sortedOrders.map(o => {
             const method = o.metodePembayaran || "CASH";
             
             return `
@@ -66,7 +89,7 @@
                     </span>
                   </div>
 
-                  <!-- Form Tersembunyi untuk Ubah Metode (Hanya Muncul Jika Diklik Kasir) -->
+                  <!-- Form Tersembunyi untuk Ubah Metode -->
                   <div id="change-box-${o.orderId}" class="no-print" style="display:none; margin-top:0.5rem; background:#f8fafc; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
                     <label style="font-size:0.75rem; font-weight:bold; display:block; margin-bottom:0.25rem;">Ubah Metode Ke:</label>
                     <select id="select-method-${o.orderId}" style="width:100%; padding:0.3rem; margin-bottom:0.5rem; font-size:0.85rem;">
