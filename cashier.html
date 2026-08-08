@@ -16,60 +16,69 @@
     <div id="cashier-orders">Memuat data transaksi...</div>
   </div>
 
+  <!-- HANYA BAGIAN DI BAWAH INI SANGAT PENTING DITERAPKAN -->
   <script src="js/api.js"></script>
   <script>
     async function loadCashierOrders() {
-      const res = await RestoAPI.getCashierOrders();
       const container = document.getElementById("cashier-orders");
+      
+      try {
+        const res = await RestoAPI.getCashierOrders();
 
-      if (res.success) {
-        if (!res.data || res.data.length === 0) {
-          container.innerHTML = "<p style='text-align:center;'>Tidak ada transaksi aktif.</p>";
-          return;
-        }
+        if (res && res.success) {
+          if (!res.data || res.data.length === 0) {
+            container.innerHTML = "<p style='text-align:center; padding: 2rem;'>Tidak ada transaksi aktif saat ini.</p>";
+            return;
+          }
 
-        container.innerHTML = res.data.map(o => `
-          <div class="order-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-              <strong>ID: ${o.orderId}</strong>
-              <span class="badge badge-${o.status}">${o.status}</span>
-            </div>
-            <p style="margin: 0 0 0.5rem 0;">Pemesan / Meja: <strong>${o.mejaNama}</strong></p>
-            
-            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
-            
-            <div style="font-size:0.85rem; margin-bottom: 0.75rem;">
-              ${o.items ? o.items.map(i => `
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
-                  <span>${i.nama} x ${i.qty}</span>
-                  <span>Rp ${Number(i.subtotal).toLocaleString('id-ID')}</span>
-                </div>
-              `).join('') : ''}
-            </div>
-
-            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-              <span style="font-weight:bold;">Total Pembayaran:</span>
-              <strong style="color:var(--primary); font-size:1.1rem;">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
-            </div>
-
-            ${o.status !== "Selesai" ? `
-              <div class="form-group" style="margin-bottom: 0.75rem;">
-                <label style="font-size: 0.8rem;">Pilih Metode Pembayaran:</label>
-                <select id="method-${o.orderId}">
-                  <option value="QRIS">QRIS (Gopay/OVO/Dana/BCA)</option>
-                  <option value="TRANSFER">Transfer Bank</option>
-                  <option value="CASH">Tunai / Cash</option>
-                </select>
+          container.innerHTML = res.data.map(o => `
+            <div class="order-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <strong>ID: ${o.orderId}</strong>
+                <span class="badge badge-${o.status}">${o.status}</span>
+              </div>
+              <p style="margin: 0 0 0.5rem 0;">Pemesan / Meja: <strong>${o.mejaNama}</strong></p>
+              
+              <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+              
+              <div style="font-size:0.85rem; margin-bottom: 0.75rem;">
+                ${o.items && o.items.length > 0 ? o.items.map(i => `
+                  <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                    <span>${i.nama} x ${i.qty}</span>
+                    <span>Rp ${Number(i.subtotal).toLocaleString('id-ID')}</span>
+                  </div>
+                `).join('') : '<p style="color:red;">Detail pesanan tidak ditemukan</p>'}
               </div>
 
-              <button class="btn btn-success" onclick="processPayment('${o.orderId}', ${o.total})">
-                Konfirmasi Pembayaran Lunas
-              </button>
-            ` : `<p style="color:green; font-weight:bold; margin:0; text-align:center;">✓ Lunas</p>`}
-          </div>
-        `).join('');
+              <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                <span style="font-weight:bold;">Total Pembayaran:</span>
+                <strong style="color:var(--primary); font-size:1.1rem;">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
+              </div>
+
+              ${o.status !== "Selesai" ? `
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                  <label style="font-size: 0.8rem;">Pilih Metode Pembayaran:</label>
+                  <select id="method-${o.orderId}">
+                    <option value="QRIS">QRIS (Gopay/OVO/Dana/BCA)</option>
+                    <option value="TRANSFER">Transfer Bank</option>
+                    <option value="CASH">Tunai / Cash</option>
+                  </select>
+                </div>
+
+                <button class="btn btn-success" onclick="processPayment('${o.orderId}', ${o.total})">
+                  Konfirmasi Pembayaran Lunas
+                </button>
+              ` : `<p style="color:green; font-weight:bold; margin:0; text-align:center;">✓ Lunas</p>`}
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = `<p style="color:red; text-align:center; padding: 2rem;">Gagal memuat data: ${res ? res.message : 'Respon server kosong'}</p>`;
+        }
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p style="color:red; text-align:center; padding: 2rem;">Koneksi Terputus / Error: ${err.message}</p>`;
       }
     }
 
@@ -84,11 +93,11 @@
       };
 
       const res = await RestoAPI.processPayment(orderId, paymentDetails);
-      if (res.success) {
+      if (res && res.success) {
         alert("Pembayaran Berhasil!");
         loadCashierOrders();
       } else {
-        alert("Gagal memproses pembayaran: " + res.message);
+        alert("Gagal memproses pembayaran: " + (res ? res.message : 'Terjadi kesalahan'));
       }
     }
 
