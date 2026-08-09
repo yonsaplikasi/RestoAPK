@@ -22,131 +22,193 @@
   </header>
 
   <div class="container">
+    <!-- Area Kotak Pencarian Data Transaksi -->
+    <div class="no-print" style="background: #fff; padding: 1rem; border-radius: var(--radius, 8px); border: 1px solid var(--border, #cbd5e1); margin-bottom: 1.5rem;">
+      <h3 style="margin-top: 0; margin-bottom: 0.75rem; font-size: 1rem;">Cari Riwayat / Struk Transaksi</h3>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <input type="text" id="search-input" onkeyup="handleSearch()" placeholder="Cari ID Order, No Meja/Pemesan, atau Tanggal..." style="flex: 1; min-width: 200px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+        <button class="btn" onclick="handleSearch()" style="width: auto; padding: 0.5rem 1rem;">Cari</button>
+        <button class="btn" onclick="resetSearch()" style="width: auto; padding: 0.5rem 1rem; background: #64748b;">Reset</button>
+      </div>
+      <p id="search-info" style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #0284c7; display: none;"></p>
+    </div>
+
     <div id="cashier-orders">Memuat data transaksi...</div>
   </div>
 
   <script src="js/api.js"></script>
   <script>
+    let rawCashierOrders = []; // Menyimpan master seluruh data dari server
+    let isSearching = false;    // Menandai jika sedang dalam mode pencarian
+
     async function loadCashierOrders() {
-      const container = document.getElementById("cashier-orders");
-      
       try {
         const res = await RestoAPI.getCashierOrders();
 
-        if (res && res.success) {
-          if (!res.data || res.data.length === 0) {
-            container.innerHTML = "<p style='text-align:center; padding: 2rem;'>Tidak ada transaksi aktif saat ini.</p>";
-            return;
+        if (res && res.success && res.data) {
+          rawCashierOrders = res.data;
+          
+          // Jika tidak sedang mencari, render tampilan default
+          if (!isSearching) {
+            renderOrders(getFilteredActiveOrders(rawCashierOrders));
+          } else {
+            // Jika sedang mencari, perbarui hasil pencarian dengan data terbaru
+            handleSearch();
           }
-
-          const now = new Date().getTime();
-          const threeMinutesMs = 3 * 60 * 1000; // 3 menit dalam milidetik
-
-          // 1. FILTER: Sembunyikan jika sudah "Selesai" LEBIH DARI 3 Menit
-          const filteredOrders = res.data.filter(o => {
-            if (o.status === "Selesai") {
-              const orderTime = new Date(o.tanggal).getTime();
-              // Jika selisih waktu sekarang dengan waktu transaksi > 3 menit, hilangkan
-              if (!isNaN(orderTime) && (now - orderTime > threeMinutesMs)) {
-                return false; 
-              }
-            }
-            return true;
-          });
-
-          // 2. URUTAN: Balik array (.reverse()) agar data terbaru muncul di PALING ATAS
-          const sortedOrders = filteredOrders.reverse();
-
-          if (sortedOrders.length === 0) {
-            container.innerHTML = "<p style='text-align:center; padding: 2rem;'>Tidak ada transaksi aktif saat ini.</p>";
-            return;
-          }
-
-          container.innerHTML = sortedOrders.map(o => {
-            const method = o.metodePembayaran || "CASH";
-            
-            return `
-              <div class="order-card" id="receipt-${o.orderId}">
-                <!-- Header Struk Print -->
-                <div style="text-align:center; margin-bottom: 0.5rem;" class="print-only">
-                  <h3 style="margin:0;">RESTO KITA</h3>
-                  <p style="margin:0; font-size:0.8rem;">Struk Pembayaran</p>
-                  <hr style="border:0; border-top:1px dashed #000; margin:0.5rem 0;">
-                </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                  <strong>ID: ${o.orderId}</strong>
-                  <span class="badge badge-${o.status}">${o.status}</span>
-                </div>
-                <p style="margin: 0 0 0.25rem 0;">Pemesan / Meja: <strong>${o.mejaNama}</strong></p>
-                
-                <!-- Info Metode & Form Ubah Metode -->
-                <div style="margin: 0.5rem 0; font-size:0.85rem;">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>Metode Pembayaran:</span>
-                    <span id="label-method-${o.orderId}" style="background:#E0F2FE; color:#0369A1; padding:2px 8px; border-radius:4px; font-weight:bold;">
-                      ${method}
-                    </span>
-                  </div>
-
-                  <!-- Form Tersembunyi untuk Ubah Metode -->
-                  <div id="change-box-${o.orderId}" class="no-print" style="display:none; margin-top:0.5rem; background:#f8fafc; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
-                    <label style="font-size:0.75rem; font-weight:bold; display:block; margin-bottom:0.25rem;">Ubah Metode Ke:</label>
-                    <select id="select-method-${o.orderId}" style="width:100%; padding:0.3rem; margin-bottom:0.5rem; font-size:0.85rem;">
-                      <option value="CASH" ${method === 'CASH' ? 'selected' : ''}>CASH / Tunai</option>
-                      <option value="QRIS" ${method === 'QRIS' ? 'selected' : ''}>QRIS</option>
-                      <option value="TRANSFER" ${method === 'TRANSFER' ? 'selected' : ''}>Transfer Bank</option>
-                    </select>
-                    <button class="btn" style="padding:0.25rem 0.5rem; font-size:0.75rem; background:#0284c7;" onclick="saveNewMethod('${o.orderId}')">
-                      Simpan Perubahan
-                    </button>
-                  </div>
-                </div>
-                
-                <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
-                
-                <!-- Rincian Pesanan -->
-                <div style="font-size:0.85rem; margin-bottom: 0.75rem;">
-                  ${o.items && o.items.length > 0 ? o.items.map(i => `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
-                      <span>${i.nama} x ${i.qty}</span>
-                      <span>Rp ${Number(i.subtotal).toLocaleString('id-ID')}</span>
-                    </div>
-                  `).join('') : '<p style="color:red;">Detail pesanan tidak ditemukan</p>'}
-                </div>
-
-                <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
-                  <span style="font-weight:bold;">Total Pembayaran:</span>
-                  <strong style="color:var(--primary); font-size:1.1rem;">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
-                </div>
-
-                <!-- Tombol Aksi Kasir -->
-                <div class="no-print" style="display:flex; gap:0.5rem; flex-direction:column;">
-                  ${o.status !== "Selesai" ? `
-                    <button class="btn btn-success" id="btn-pay-${o.orderId}" onclick="processPayment('${o.orderId}', ${o.total})">
-                      Konfirmasi Lunas (${method})
-                    </button>
-                    
-                    <button class="btn" style="background:#f59e0b; color:white; font-size:0.8rem;" onclick="toggleChangeMethod('${o.orderId}')">
-                      ✏️ Ubah Metode Pembayaran
-                    </button>
-                  ` : `<p style="color:green; font-weight:bold; margin:0; text-align:center;">✓ Pembayaran Lunas (${method})</p>`}
-                  
-                  <button class="btn" style="background:#64748b;" onclick="printReceipt('${o.orderId}')">
-                    🖨️ Cetak Struk
-                  </button>
-                </div>
-              </div>
-            `;
-          }).join('');
         } else {
-          container.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data.</p>`;
+          document.getElementById("cashier-orders").innerHTML = `<p style="color:red; text-align:center;">Gagal memuat data.</p>`;
         }
       } catch (err) {
-        container.innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
+        document.getElementById("cashier-orders").innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
       }
+    }
+
+    // Filter bawaan: Sembunyikan transaksi "Selesai" yang > 3 Menit untuk layar utama
+    function getFilteredActiveOrders(dataList) {
+      const now = new Date().getTime();
+      const threeMinutesMs = 3 * 60 * 1000;
+
+      const filtered = dataList.filter(o => {
+        if (o.status === "Selesai") {
+          const orderTime = new Date(o.tanggal).getTime();
+          if (!isNaN(orderTime) && (now - orderTime > threeMinutesMs)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      return filtered.slice().reverse(); // Data terbaru muncul di atas
+    }
+
+    // Fungsi Render Card HTML ke Layar
+    function renderOrders(ordersToDisplay) {
+      const container = document.getElementById("cashier-orders");
+
+      if (!ordersToDisplay || ordersToDisplay.length === 0) {
+        container.innerHTML = "<p style='text-align:center; padding: 2rem;'>Data transaksi tidak ditemukan.</p>";
+        return;
+      }
+
+      container.innerHTML = ordersToDisplay.map(o => {
+        const method = o.metodePembayaran || "CASH";
+        const tglFormatted = o.tanggal ? new Date(o.tanggal).toLocaleString('id-ID') : '-';
+        
+        return `
+          <div class="order-card" id="receipt-${o.orderId}" style="margin-bottom: 1rem;">
+            <!-- Header Struk Print -->
+            <div style="text-align:center; margin-bottom: 0.5rem;" class="print-only">
+              <h3 style="margin:0;">RESTO KITA</h3>
+              <p style="margin:0; font-size:0.8rem;">Struk Pembayaran</p>
+              <p style="margin:0; font-size:0.75rem;">Tgl: ${tglFormatted}</p>
+              <hr style="border:0; border-top:1px dashed #000; margin:0.5rem 0;">
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <strong>ID: ${o.orderId}</strong>
+              <span class="badge badge-${o.status}">${o.status}</span>
+            </div>
+            <p style="margin: 0 0 0.25rem 0;">Pemesan / Meja: <strong>${o.mejaNama}</strong></p>
+            <p style="margin: 0 0 0.25rem 0; font-size:0.8rem; color:#64748b;" class="no-print">Waktu: ${tglFormatted}</p>
+            
+            <!-- Info Metode & Form Ubah Metode -->
+            <div style="margin: 0.5rem 0; font-size:0.85rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Metode Pembayaran:</span>
+                <span id="label-method-${o.orderId}" style="background:#E0F2FE; color:#0369A1; padding:2px 8px; border-radius:4px; font-weight:bold;">
+                  ${method}
+                </span>
+              </div>
+
+              <!-- Form Tersembunyi untuk Ubah Metode -->
+              <div id="change-box-${o.orderId}" class="no-print" style="display:none; margin-top:0.5rem; background:#f8fafc; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
+                <label style="font-size:0.75rem; font-weight:bold; display:block; margin-bottom:0.25rem;">Ubah Metode Ke:</label>
+                <select id="select-method-${o.orderId}" style="width:100%; padding:0.3rem; margin-bottom:0.5rem; font-size:0.85rem;">
+                  <option value="CASH" ${method === 'CASH' ? 'selected' : ''}>CASH / Tunai</option>
+                  <option value="QRIS" ${method === 'QRIS' ? 'selected' : ''}>QRIS</option>
+                  <option value="TRANSFER" ${method === 'TRANSFER' ? 'selected' : ''}>Transfer Bank</option>
+                </select>
+                <button class="btn" style="padding:0.25rem 0.5rem; font-size:0.75rem; background:#0284c7;" onclick="saveNewMethod('${o.orderId}')">
+                  Simpan Perubahan
+                </button>
+              </div>
+            </div>
+            
+            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+            
+            <!-- Rincian Pesanan -->
+            <div style="font-size:0.85rem; margin-bottom: 0.75rem;">
+              ${o.items && o.items.length > 0 ? o.items.map(i => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                  <span>${i.nama} x ${i.qty}</span>
+                  <span>Rp ${Number(i.subtotal || (i.harga * i.qty)).toLocaleString('id-ID')}</span>
+                </div>
+              `).join('') : '<p style="color:red;">Detail pesanan tidak ditemukan</p>'}
+            </div>
+
+            <hr style="border:0; border-top: 1px dashed var(--border); margin: 0.75rem 0;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+              <span style="font-weight:bold;">Total Pembayaran:</span>
+              <strong style="color:var(--primary); font-size:1.1rem;">Rp ${Number(o.total).toLocaleString('id-ID')}</strong>
+            </div>
+
+            <!-- Tombol Aksi Kasir -->
+            <div class="no-print" style="display:flex; gap:0.5rem; flex-direction:column;">
+              ${o.status !== "Selesai" ? `
+                <button class="btn btn-success" id="btn-pay-${o.orderId}" onclick="processPayment('${o.orderId}', ${o.total})">
+                  Konfirmasi Lunas (${method})
+                </button>
+                
+                <button class="btn" style="background:#f59e0b; color:white; font-size:0.8rem;" onclick="toggleChangeMethod('${o.orderId}')">
+                  ✏️ Ubah Metode Pembayaran
+                </button>
+              ` : `<p style="color:green; font-weight:bold; margin:0; text-align:center;">✓ Pembayaran Lunas (${method})</p>`}
+              
+              <button class="btn" style="background:#64748b;" onclick="printReceipt('${o.orderId}')">
+                🖨️ Cetak Struk
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Logika Pencarian (Mencari dari SELURUH riwayat, melewati batas 3 menit)
+    function handleSearch() {
+      const keyword = document.getElementById("search-input").value.toLowerCase().trim();
+      const infoEl = document.getElementById("search-info");
+
+      if (!keyword) {
+        isSearching = false;
+        infoEl.style.display = "none";
+        renderOrders(getFilteredActiveOrders(rawCashierOrders));
+        return;
+      }
+
+      isSearching = true;
+
+      const results = rawCashierOrders.filter(o => {
+        const idMatch = o.orderId && o.orderId.toLowerCase().includes(keyword);
+        const mejaMatch = o.mejaNama && o.mejaNama.toLowerCase().includes(keyword);
+        const tglStr = o.tanggal ? new Date(o.tanggal).toLocaleString('id-ID').toLowerCase() : '';
+        const tglMatch = tglStr.includes(keyword);
+
+        return idMatch || mejaMatch || tglMatch;
+      }).reverse();
+
+      infoEl.style.display = "block";
+      infoEl.innerText = `Menampilkan ${results.length} data riwayat untuk kata kunci "${keyword}"`;
+      
+      renderOrders(results);
+    }
+
+    // Reset Pencarian
+    function resetSearch() {
+      document.getElementById("search-input").value = "";
+      document.getElementById("search-info").style.display = "none";
+      isSearching = false;
+      renderOrders(getFilteredActiveOrders(rawCashierOrders));
     }
 
     // Toggle Tampilan Form Ubah Metode
@@ -157,32 +219,28 @@
       }
     }
 
-    // Simpan Metode Pembayaran Baru (Misal dari QRIS -> CASH karena bank error)
+    // Simpan Metode Pembayaran Baru
     function saveNewMethod(orderId) {
       const selectedMethod = document.getElementById(`select-method-${orderId}`).value;
       
-      // Update Label
       const label = document.getElementById(`label-method-${orderId}`);
       if (label) label.innerText = selectedMethod;
 
-      // Update Teks Tombol Konfirmasi
       const btnPay = document.getElementById(`btn-pay-${orderId}`);
       if (btnPay) btnPay.innerText = `Konfirmasi Lunas (${selectedMethod})`;
 
-      // Sembunyikan Form
       toggleChangeMethod(orderId);
       alert(`Metode pembayaran berhasil diubah menjadi ${selectedMethod}`);
     }
 
     // Proses Konfirmasi Lunas
     async function processPayment(orderId, total) {
-      // Mengambil metode pembayaran terbaru yang sedang tampil di label
       const currentMethod = document.getElementById(`label-method-${orderId}`).innerText.trim();
 
       if (!confirm(`Pastikan dana Rp ${total.toLocaleString('id-ID')} via ${currentMethod} sudah diterima.\n\nKonfirmasi Lunas?`)) return;
       
       const paymentDetails = {
-        metode: currentMethod, // Metode dikirim sesuai pilihan kasir terbaru
+        metode: currentMethod,
         total: total
       };
 
@@ -205,10 +263,10 @@
       card.classList.remove("printable-receipt");
     }
 
-    // 1. Muat data pertama kali saat halaman dibuka
+    // 1. Muat data pertama kali
     loadCashierOrders();
 
-    // 2. Auto-refresh setiap 5 detik agar pesanan baru otomatis muncul
+    // 2. Auto-refresh setiap 5 detik
     setInterval(() => {
       loadCashierOrders();
     }, 5000);
