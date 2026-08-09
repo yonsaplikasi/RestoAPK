@@ -101,23 +101,31 @@ function cancelAllOrders() {
 async function processCheckout() {
   const cart = JSON.parse(localStorage.getItem("resto_cart") || "[]");
   const mode = localStorage.getItem("resto_mode");
+  
   const custNameEl = document.getElementById("cust-name");
   const custName = custNameEl ? custNameEl.value.trim() : "";
+
+  // Ambil data WhatsApp
+  const custWaEl = document.getElementById("cust-wa");
+  const custWa = custWaEl ? custWaEl.value.trim() : "";
+
   const paymentMethodEl = document.getElementById("payment-method");
   const paymentMethod = paymentMethodEl ? paymentMethodEl.value : "CASH";
 
   if (!custName) return alert("Isi nama pemesan terlebih dahulu!");
+  if (!custWa) return alert("Isi nomor WhatsApp terlebih dahulu!");
   if (cart.length === 0) return alert("Keranjang kosong!");
 
   let finalMejaInfo = "";
   if (mode === "FIXED_TABLE") {
     const savedMeja = localStorage.getItem("resto_meja");
-    finalMejaInfo = `${savedMeja} (${custName})`;
+    // Format penggabungan info nama & WA
+    finalMejaInfo = `${savedMeja} (${custName} - WA: ${custWa})`;
   } else {
     const selectedTableEl = document.getElementById("cust-table");
     const selectedTable = selectedTableEl ? selectedTableEl.value : "";
     if (!selectedTable) return alert("Pilih Nomor Meja atau Tipe Pesanan!");
-    finalMejaInfo = `${selectedTable} (${custName})`;
+    finalMejaInfo = `${selectedTable} (${custName} - WA: ${custWa})`;
   }
 
   // Informasi Notifikasi ke Pelanggan
@@ -129,7 +137,7 @@ async function processCheckout() {
 
   const payload = {
     nomorMeja: finalMejaInfo,
-    metodePembayaran: paymentMethod, // Dikirim ke Google Apps Script
+    metodePembayaran: paymentMethod,
     total: cart.reduce((sum, i) => sum + (i.harga * i.qty), 0),
     items: cart
   };
