@@ -19,12 +19,19 @@
         + Tambah Menu Lainnya
       </a>
 
+      <!-- Input Nama Pemesan -->
       <div class="form-group">
         <label for="cust-name">Nama Pemesan <span style="color:red">*</span></label>
         <input type="text" id="cust-name" placeholder="Contoh: Budi" required>
       </div>
 
-      <div class="form-group" id="table-select-group" style="display: none;">
+      <!-- Tambahan Input Nomor WhatsApp -->
+      <div class="form-group" style="margin-top: 1rem;">
+        <label for="cust-wa">Nomor WhatsApp <span style="color:red">*</span></label>
+        <input type="tel" id="cust-wa" placeholder="Contoh: 081234567890" required>
+      </div>
+
+      <div class="form-group" id="table-select-group" style="display: none; margin-top: 1rem;">
         <label for="cust-table">Pilih Nomor Meja / Tipe <span style="color:red">*</span></label>
         <select id="cust-table">
           <option value="">-- Pilih --</option>
@@ -36,7 +43,7 @@
       </div>
 
       <!-- Pilihan Metode Pembayaran -->
-      <div class="form-group">
+      <div class="form-group" style="margin-top: 1rem;">
         <label for="payment-method">Metode Pembayaran <span style="color:red">*</span></label>
         <select id="payment-method" onchange="togglePaymentInfo()">
           <option value="CASH">Bayar di Kasir (Tunai)</option>
@@ -46,17 +53,17 @@
       </div>
 
       <!-- Informasi Pembayaran Dinamis -->
-      <div id="cash-info" style="display: block; background: #FFF; border: 1px dashed var(--primary); padding: 1rem; border-radius: var(--radius); text-align: center; margin-bottom: 1rem;">
-        <p style="margin: 0; font-size: 0.85rem; color: var(--text-dark);"> Silakan lakukan pembayaran TUNAI di kasir setelah membuat pesanan.</p>
+      <div id="cash-info" style="display: block; background: #FFF; border: 1px dashed var(--primary); padding: 1rem; border-radius: var(--radius); text-align: center; margin: 1rem 0;">
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-dark);">Silakan lakukan pembayaran TUNAI di kasir setelah membuat pesanan.</p>
       </div>
 
-      <div id="qris-info" style="display: none; background: #FFF; border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); text-align: center; margin-bottom: 1rem;">
+      <div id="qris-info" style="display: none; background: #FFF; border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); text-align: center; margin: 1rem 0;">
         <p style="margin: 0 0 0.5rem 0; font-weight: bold; font-size: 0.9rem;">Scan QRIS di bawah ini:</p>
         <img src="https://via.placeholder.com/200x200?text=QRIS+RESTO" alt="QRIS Resto" style="max-width: 180px; border-radius: 8px; border: 1px solid #ddd;">
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Tunjukkan bukti bayar ke kasir untuk konfirmasi.</p>
       </div>
 
-      <div id="transfer-info" style="display: none; background: #FFF; border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+      <div id="transfer-info" style="display: none; background: #FFF; border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); margin: 1rem 0;">
         <p style="margin: 0 0 0.5rem 0; font-weight: bold; font-size: 0.9rem;">Transfer Rekening Bank:</p>
         <p style="margin: 0.2rem 0; font-size: 0.85rem;"><strong>BCA:</strong> 123-456-7890</p>
         <p style="margin: 0.2rem 0; font-size: 0.85rem;"><strong>Mandiri:</strong> 098-765-4321</p>
